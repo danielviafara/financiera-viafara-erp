@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financiera Viafara — ERP Bancario</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f9ff;color:#1e293b}
+.hidden{display:none!important}
+/* LOGIN */
+#login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0369a1,#38bdf8)}
+.login-box{background:#fff;border-radius:20px;padding:48px 40px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.login-logo{text-align:center;font-size:26px;font-weight:700;color:#0369a1;margin-bottom:4px}
+.login-logo span{color:#38bdf8}
+.login-sub{text-align:center;font-size:13px;color:#64748b;margin-bottom:28px}
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px}
+.fg input,.fg select,.fg textarea{width:100%;padding:10px 13px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;outline:none;font-family:inherit;transition:border .2s}
+.fg input:focus,.fg select:focus{border-color:#38bdf8;box-shadow:0 0 0 3px rgba(56,189,248,.12)}
+.btn-p{width:100%;background:#0ea5e9;color:#fff;border:none;padding:12px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s}
+.btn-p:hover{background:#0284c7}
+.hint{background:#f0f9ff;border-radius:8px;padding:10px 12px;margin-top:14px;font-size:12px;color:#0369a1;line-height:1.6}
+.err{color:#ef4444;font-size:13px;text-align:center;margin-top:10px}
+/* LAYOUT */
+#app{display:flex;min-height:100vh}
+.sidebar{width:220px;background:#0369a1;flex-shrink:0;display:flex;flex-direction:column}
+.s-logo{padding:24px 20px 16px;font-size:16px;font-weight:700;color:#fff;border-bottom:1px solid rgba(255,255,255,.15)}
+.s-logo span{color:#bae6fd}
+.s-nav{padding:12px 10px;flex:1}
+.ni{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:500;color:rgba(255,255,255,.7);margin-bottom:2px;transition:all .15s}
+.ni:hover,.ni.active{background:rgba(255,255,255,.15);color:#fff}
+.s-foot{padding:16px 20px;border-top:1px solid rgba(255,255,255,.15)}
+.s-foot .u-name{font-size:13px;font-weight:600;color:#fff;margin-bottom:2px}
+.s-foot .u-rol{font-size:11px;color:#bae6fd;margin-bottom:8px}
+.s-foot button{width:100%;background:rgba(255,255,255,.1);color:#fff;border:none;padding:7px;border-radius:6px;font-size:12px;cursor:pointer}
+.s-foot button:hover{background:rgba(255,255,255,.2)}
+.main{flex:1;overflow-y:auto}
+.topbar{background:#fff;padding:14px 24px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.topbar h1{font-size:18px;font-weight:600}
+.bpill{padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;background:#dbeafe;color:#1e40af}
+.bpill.green{background:#dcfce7;color:#15803d}
+.content{padding:24px}
+/* CARDS */
+.grid{display:grid;gap:16px;margin-bottom:22px}
+.g4{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.card{background:#fff;border-radius:12px;padding:20px;border:1px solid #e2e8f0}
+.card .lbl{font-size:11px;color:#64748b;font-weight:500;margin-bottom:6px}
+.card .val{font-size:26px;font-weight:700;color:#0f172a}
+.card .sub{font-size:11px;color:#22c55e;margin-top:3px}
+/* ACCOUNT CARDS */
+.acc-card{background:linear-gradient(135deg,#0369a1,#38bdf8);color:#fff;border-radius:14px;padding:22px;position:relative;overflow:hidden}
+.acc-card .ac-tipo{font-size:11px;opacity:.8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.acc-card .ac-num{font-size:12px;opacity:.7;margin-bottom:12px;font-family:monospace}
+.acc-card .ac-saldo{font-size:24px;font-weight:700}
+.acc-card .ac-lbl{font-size:11px;opacity:.7;margin-bottom:4px}
+.acc-card-green{background:linear-gradient(135deg,#059669,#34d399)}
+/* SECTION */
+.sec{background:#fff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;margin-bottom:20px}
+.sec-h{padding:16px 20px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between}
+.sec-h h2{font-size:14px;font-weight:600}
+.sec-h .actions{display:flex;gap:8px}
+table{width:100%;border-collapse:collapse}
+th{background:#f8fafc;padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.4px}
+td{padding:11px 14px;font-size:13px;border-top:1px solid #f1f5f9;color:#374151}
+tr:hover td{background:#f8fafc}
+.tag{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600}
+.t-admin{background:#dbeafe;color:#1e40af}.t-cliente{background:#dcfce7;color:#15803d}
+.t-pendiente{background:#fef3c7;color:#92400e}.t-aprobada{background:#dcfce7;color:#15803d}
+.t-rechazada{background:#fee2e2;color:#991b1b}.t-activa{background:#dcfce7;color:#15803d}
+.t-completada{background:#dbeafe;color:#1e40af}
+.t-ahorro{background:#e0f2fe;color:#0369a1}.t-corriente{background:#ede9fe;color:#6d28d9}
+.t-Cuentas{background:#e0f2fe;color:#0369a1}.t-Tarjetas{background:#ede9fe;color:#6d28d9}
+.t-Creditos{background:#fef3c7;color:#92400e}.t-Inversiones{background:#dcfce7;color:#15803d}
+/* BUTTONS */
+.btn-a{background:#22c55e;color:#fff;border:none;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;margin-right:4px}
+.btn-r{background:#ef4444;color:#fff;border:none;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer}
+.btn-s{background:#0ea5e9;color:#fff;border:none;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer}
+.btn-s:hover{background:#0284c7}
+/* MODAL */
+.mb{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:1000}
+.modal{background:#fff;border-radius:16px;padding:28px;width:90%;max-width:480px;max-height:90vh;overflow-y:auto}
+.modal h3{font-size:16px;font-weight:600;margin-bottom:18px;color:#0f172a}
+.m-btns{display:flex;gap:8px;margin-top:18px}
+.btn-cancel{flex:1;background:#f1f5f9;color:#374151;border:none;padding:10px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer}
+.btn-ok{flex:2;background:#0ea5e9;color:#fff;border:none;padding:10px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer}
+.btn-ok:hover{background:#0284c7}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+/* ACID TOAST */
+.toast{position:fixed;bottom:24px;right:24px;padding:14px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;max-width:380px;line-height:1.5;box-shadow:0 8px 24px rgba(0,0,0,.15)}
+.toast.ok{background:#022c22;color:#4ade80;border:1px solid #166534}
+.toast.err{background:#2c0202;color:#f87171;border:1px solid #991b1b}
+/* CLIENT */
+#cliente-page{min-height:100vh}
+.c-header{background:#0369a1;padding:16px 28px;display:flex;align-items:center;justify-content:space-between}
+.c-logo{font-size:18px;font-weight:700;color:#fff}
+.c-logo span{color:#bae6fd}
+.c-content{max-width:1000px;margin:0 auto;padding:28px 20px}
+.welcome{background:linear-gradient(135deg,#0369a1,#38bdf8);color:#fff;border-radius:14px;padding:24px 28px;margin-bottom:24px}
+.welcome h2{font-size:20px;font-weight:700;margin-bottom:4px}
+.welcome p{font-size:13px;opacity:.85}
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;padding:16px}
+.pc{background:#fff;border-radius:10px;padding:18px;border:1px solid #e2e8f0;transition:box-shadow .2s}
+.pc:hover{box-shadow:0 6px 20px rgba(14,165,233,.12)}
+.pc .ico{font-size:28px;margin-bottom:10px}
+.pc .pn{font-size:14px;font-weight:600;margin-bottom:4px}
+.pc .pd{font-size:12px;color:#64748b;margin-bottom:10px;line-height:1.4}
+.pc .pp{font-size:16px;font-weight:700;color:#0ea5e9;margin-bottom:12px}
+.pc button{width:100%;background:#0ea5e9;color:#fff;border:none;padding:8px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer}
+.pc button:hover{background:#0284c7}
+/* TRANSFER FORM */
+.tx-form{background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:24px;margin-bottom:20px}
+.tx-form h2{font-size:15px;font-weight:600;margin-bottom:18px}
+.acid-badge{display:inline-block;background:#1e3a5f;color:#60a5fa;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;margin-left:8px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-page">
+  <div class="login-box">
+    <div class="login-logo">Financiera <span>Viafara</span></div>
+    <div class="login-sub">Sistema ERP Bancario — Acceso seguro</div>
+    <div class="fg"><label>Correo electrónico</label><input type="email" id="le" placeholder="correo@financieraviafara.com"></div>
+    <div class="fg"><label>Contraseña</label><input type="password" id="lp" placeholder="••••••••"></div>
+    <button class="btn-p" onclick="doLogin()">Iniciar sesión</button>
+    <div class="err hidden" id="lerr"></div>
+    <div class="hint"><strong>Cuentas de prueba:</strong><br>🔧 Admin: admin@financieraviafara.com / admin123<br>👤 Cliente: daniel@financieraviafara.com / user123</div>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="app" class="hidden">
+  <aside class="sidebar">
+    <div class="s-logo">Financiera <span>Viafara</span></div>
+    <nav class="s-nav">
+      <div class="ni active" onclick="goTo(this,'dashboard')">📊 Dashboard</div>
+      <div class="ni" onclick="goTo(this,'cuentas')">🏦 Cuentas</div>
+      <div class="ni" onclick="goTo(this,'transferencias')">🔄 Transferencias</div>
+      <div class="ni" onclick="goTo(this,'solicitudes')">📋 Solicitudes</div>
+      <div class="ni" onclick="goTo(this,'usuarios')">👥 Usuarios</div>
+      <div class="ni" onclick="goTo(this,'inventario')">📦 Inventario</div>
+    </nav>
+    <div class="s-foot">
+      <div class="u-name" id="uname"></div>
+      <div class="u-rol">Administrador del sistema</div>
+      <button onclick="logout()">Cerrar sesión</button>
+    </div>
+  </aside>
+  <div class="main">
+    <div class="topbar"><h1 id="ptitle">Dashboard</h1><span class="bpill" id="pbadge">ERP Admin</span></div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<!-- CLIENT PAGE -->
+<div id="cliente-page" class="hidden">
+  <div class="c-header">
+    <div class="c-logo">Financiera <span>Viafara</span></div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <span id="cname" style="color:#fff;font-size:13px"></span>
+      <span class="tag t-cliente">Cliente</span>
+      <button onclick="logout()" style="background:rgba(255,255,255,.15);color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer">Salir</button>
+    </div>
+  </div>
+  <div class="c-content">
+    <div class="welcome"><h2>Hola, <span id="cwelcome"></span> 👋</h2><p>Gestiona tus cuentas, realiza transferencias y solicita nuevos productos financieros.</p></div>
+    <!-- Client tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+      <button class="btn-s ct-btn active-tab" onclick="cTab(this,'c-mis-cuentas')">🏦 Mis cuentas</button>
+      <button class="btn-s ct-btn" style="background:#f1f5f9;color:#374151" onclick="cTab(this,'c-transferir')">🔄 Transferir</button>
+      <button class="btn-s ct-btn" style="background:#f1f5f9;color:#374151" onclick="cTab(this,'c-solicitar')">➕ Solicitar servicio</button>
+      <button class="btn-s ct-btn" style="background:#f1f5f9;color:#374151" onclick="cTab(this,'c-movimientos')">📜 Movimientos</button>
+      <button class="btn-s ct-btn" style="background:#f1f5f9;color:#374151" onclick="cTab(this,'c-mis-solicitudes')">📋 Mis solicitudes</button>
+    </div>
+    <!-- Mis cuentas -->
+    <div id="c-mis-cuentas">
+      <div class="grid g2" id="c-cuentas-grid"></div>
+    </div>
+    <!-- Transferir -->
+    <div id="c-transferir" class="hidden">
+      <div class="tx-form">
+        <h2>🔄 Nueva transferencia <span class="acid-badge">⚡ ACID — Atomicidad</span></h2>
+        <div class="row2">
+          <div class="fg"><label>Cuenta origen</label><select id="tx-origen"></select></div>
+          <div class="fg"><label>Cuenta destino (ID)</label><input type="number" id="tx-destino" placeholder="ID de cuenta destino"></div>
+        </div>
+        <div class="row2">
+          <div class="fg"><label>Monto ($)</label><input type="number" id="tx-monto" placeholder="0" min="1"></div>
+          <div class="fg"><label>Descripción</label><input type="text" id="tx-desc" placeholder="Transferencia" value="Transferencia"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="btn-p" style="flex:2" onclick="hacerTransferencia()">Transferir</button>
+          <button onclick="loadClientTab('c-transferir')" style="flex:1;background:#f1f5f9;color:#374151;border:none;padding:12px;border-radius:8px;font-size:13px;cursor:pointer">Ver todas las cuentas</button>
+        </div>
+        <div style="margin-top:16px;padding:12px;background:#f0f9ff;border-radius:8px;font-size:12px;color:#0369a1">
+          <strong>⚡ Demo ACID — Atomicidad:</strong> Si la transferencia falla (saldo insuficiente, cuenta inexistente), SQL Server ejecuta ROLLBACK automático. Ningún saldo cambia si no se completan ambos pasos (débito + crédito).
+        </div>
+      </div>
+      <div class="sec"><div class="sec-h"><h2>Todas las cuentas disponibles</h2></div><table><thead><tr><th>ID</th><th>Número</th><th>Titular</th><th>Tipo</th><th>Saldo</th></tr></thead><tbody id="c-all-cuentas"></tbody></table></div>
+    </div>
+    <!-- Solicitar -->
+    <div id="c-solicitar" class="hidden">
+      <div class="prod-grid" id="c-prod-grid"></div>
+    </div>
+    <!-- Movimientos -->
+    <div id="c-movimientos" class="hidden">
+      <div class="sec"><div class="sec-h"><h2>Historial de movimientos</h2></div>
+        <table><thead><tr><th>ID</th><th>Desde</th><th>Hacia</th><th>Monto</th><th>Descripción</th><th>Fecha</th></tr></thead>
+        <tbody id="c-tx-body"></tbody></table>
+      </div>
+    </div>
+    <!-- Mis solicitudes -->
+    <div id="c-mis-solicitudes" class="hidden">
+      <div class="sec"><div class="sec-h"><h2>Mis solicitudes de servicios</h2></div>
+        <table><thead><tr><th>ID</th><th>Producto</th><th>Categoría</th><th>Fecha</th><th>Estado</th><th>Observación</th></tr></thead>
+        <tbody id="c-sol-body"></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RECHAZO -->
+<div class="mb hidden" id="modal-rechazo">
+  <div class="modal">
+    <h3>✗ Rechazar solicitud</h3>
+    <div class="fg"><label>Motivo del rechazo</label><textarea id="rechazo-motivo" rows="3" placeholder="No cumple los requisitos mínimos..."></textarea></div>
+    <div class="m-btns">
+      <button class="btn-cancel" onclick="closeModal('modal-rechazo')">Cancelar</button>
+      <button class="btn-ok" style="background:#ef4444" onclick="confirmarRechazo()">Rechazar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API='http://localhost:3000/api';
+let cu=null,prods=[],rechazoId=null,clientCuentas=[];
+const icons={Cuentas:'🏦',Tarjetas:'💳',Creditos:'💰',Inversiones:'📈'};
+const fmt=n=>parseFloat(n||0).toLocaleString('es-CO');
+const fdate=d=>new Date(d).toLocaleDateString('es-CO');
+
+function toast(msg,ok=true){
+  document.querySelectorAll('.toast').forEach(t=>t.remove());
+  const t=document.createElement('div');
+  t.className='toast '+(ok?'ok':'err');
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),4000);
+}
+
+async function doLogin(){
+  const email=document.getElementById('le').value;
+  const pass=document.getElementById('lp').value;
+  const err=document.getElementById('lerr');
+  err.classList.add('hidden');
+  try{
+    const r=await fetch(`${API}/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})});
+    const d=await r.json();
+    if(d.ok){
+      cu=d.usuario;
+      document.getElementById('login-page').classList.add('hidden');
+      if(cu.rol==='admin'){
+        document.getElementById('uname').textContent=cu.nombre;
+        document.getElementById('app').classList.remove('hidden');
+        goTo(document.querySelector('.ni.active'),'dashboard');
+      } else {
+        document.getElementById('cname').textContent=cu.nombre;
+        document.getElementById('cwelcome').textContent=cu.nombre.split(' ')[0];
+        document.getElementById('cliente-page').classList.remove('hidden');
+        loadClientTab('c-mis-cuentas');
+      }
+    } else { err.textContent=d.error||'Credenciales incorrectas'; err.classList.remove('hidden'); }
+  } catch(e){ err.textContent='Error de conexión'; err.classList.remove('hidden'); }
+}
+
+function logout(){
+  cu=null;
+  ['app','cliente-page'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  document.getElementById('login-page').classList.remove('hidden');
+  document.getElementById('le').value=''; document.getElementById('lp').value='';
+}
+
+// ── ADMIN ──
+function goTo(el,page){
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const titles={dashboard:'Dashboard',cuentas:'Cuentas bancarias',transferencias:'Transferencias',solicitudes:'Solicitudes de clientes',usuarios:'Gestión de usuarios',inventario:'Inventario de productos'};
+  document.getElementById('ptitle').textContent=titles[page]||page;
+  const renders={dashboard:renderDashboard,cuentas:renderCuentas,transferencias:renderTransferencias,solicitudes:renderSolicitudes,usuarios:renderUsuarios,inventario:renderInventario};
+  if(renders[page]) renders[page]();
+}
+
+async function renderDashboard(){
+  const [d,txs,sols]=await Promise.all([
+    fetch(`${API}/dashboard`).then(r=>r.json()),
+    fetch(`${API}/transacciones`).then(r=>r.json()),
+    fetch(`${API}/solicitudes`).then(r=>r.json())
+  ]);
+  document.getElementById('content').innerHTML=`
+    <div class="grid g4">
+      <div class="card"><div class="lbl">👥 Usuarios</div><div class="val">${d.usuarios}</div><div class="sub">Registrados</div></div>
+      <div class="card"><div class="lbl">🏦 Cuentas activas</div><div class="val">${d.cuentas}</div><div class="sub">En el sistema</div></div>
+      <div class="card"><div class="lbl">🔄 Transacciones</div><div class="val">${d.transacciones}</div><div class="sub">Total historial</div></div>
+      <div class="card"><div class="lbl">⏳ Solicitudes pendientes</div><div class="val" style="color:#f59e0b">${d.pendientes}</div><div class="sub">Por revisar</div></div>
+      <div class="card" style="grid-column:1/-1"><div class="lbl">💰 Saldo total en el sistema</div><div class="val" style="color:#0ea5e9">$${fmt(d.saldo_total)}</div><div class="sub">Suma de todas las cuentas activas</div></div>
+    </div>
+    <div class="grid g2">
+      <div class="sec"><div class="sec-h"><h2>🔄 Últimas transferencias <span class="acid-badge">ACID — Atomicidad</span></h2></div>
+        <table><thead><tr><th>ID</th><th>Desde</th><th>Hacia</th><th>Monto</th><th>Fecha</th></tr></thead>
+        <tbody>${txs.slice(0,5).map(t=>`<tr><td>#${t.id}</td><td>${t.origen_titular}<br><small>${t.origen_cuenta}</small></td><td>${t.destino_titular}<br><small>${t.destino_cuenta}</small></td><td>$${fmt(t.monto)}</td><td>${fdate(t.fecha)}</td></tr>`).join('')||'<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:20px">Sin transacciones</td></tr>'}</tbody></table>
+      </div>
+      <div class="sec"><div class="sec-h"><h2>📋 Solicitudes pendientes</h2><button class="btn-s" onclick="goTo(document.querySelectorAll('.ni')[3],'solicitudes')">Ver todas</button></div>
+        <table><thead><tr><th>Cliente</th><th>Producto</th><th>Acción</th></tr></thead>
+        <tbody>${sols.filter(s=>s.estado==='pendiente').slice(0,5).map(s=>`<tr><td>${s.cliente}</td><td>${s.producto}</td><td><button class="btn-a" onclick="aprobarSol(${s.id})">✓</button><button class="btn-r" onclick="abrirRechazo(${s.id})">✗</button></td></tr>`).join('')||'<tr><td colspan="3" style="text-align:center;color:#94a3b8;padding:20px">Sin pendientes</td></tr>'}</tbody></table>
+      </div>
+    </div>`;
+}
+
+async function renderCuentas(){
+  const cuentas=await fetch(`${API}/cuentas`).then(r=>r.json());
+  const total=cuentas.filter(c=>c.estado==='activa').reduce((s,c)=>s+parseFloat(c.saldo),0);
+  document.getElementById('content').innerHTML=`
+    <div class="grid g4" style="margin-bottom:20px">
+      <div class="card"><div class="lbl">🏦 Total cuentas</div><div class="val">${cuentas.length}</div></div>
+      <div class="card"><div class="lbl">✅ Activas</div><div class="val" style="color:#22c55e">${cuentas.filter(c=>c.estado==='activa').length}</div></div>
+      <div class="card" style="grid-column:span 2"><div class="lbl">💰 Saldo total</div><div class="val" style="color:#0ea5e9">$${fmt(total)}</div></div>
+    </div>
+    <div class="sec"><div class="sec-h"><h2>Cuentas bancarias registradas</h2></div>
+    <table><thead><tr><th>ID</th><th>Número de cuenta</th><th>Titular</th><th>Tipo</th><th>Saldo</th><th>Estado</th><th>Apertura</th></tr></thead>
+    <tbody>${cuentas.map(c=>`<tr><td>#${c.id}</td><td style="font-family:monospace;font-size:12px">${c.numero_cuenta}</td><td>${c.titular}</td><td><span class="tag t-${c.tipo}">${c.tipo}</span></td><td style="font-weight:600;color:#0369a1">$${fmt(c.saldo)}</td><td><span class="tag t-${c.estado}">${c.estado}</span></td><td>${fdate(c.fecha_apertura)}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+async function renderTransferencias(){
+  const [txs,cuentas]=await Promise.all([
+    fetch(`${API}/transacciones`).then(r=>r.json()),
+    fetch(`${API}/cuentas`).then(r=>r.json())
+  ]);
+  document.getElementById('content').innerHTML=`
+    <div class="tx-form">
+      <h2>🔄 Ejecutar transferencia <span class="acid-badge">⚡ ACID — Atomicidad + Consistencia</span></h2>
+      <div class="row2">
+        <div class="fg"><label>Cuenta origen</label>
+          <select id="adm-origen">${cuentas.filter(c=>c.estado==='activa').map(c=>`<option value="${c.id}">#${c.id} | ${c.titular} — $${fmt(c.saldo)}</option>`).join('')}</select>
+        </div>
+        <div class="fg"><label>Cuenta destino</label>
+          <select id="adm-destino">${cuentas.filter(c=>c.estado==='activa').map(c=>`<option value="${c.id}">#${c.id} | ${c.titular} — ${c.numero_cuenta}</option>`).join('')}</select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="fg"><label>Monto ($)</label><input type="number" id="adm-monto" placeholder="0" min="1"></div>
+        <div class="fg"><label>Descripción</label><input type="text" id="adm-desc" value="Transferencia administrativa"></div>
+      </div>
+      <button class="btn-p" onclick="hacerTransferenciaAdmin()">Ejecutar transferencia</button>
+      <div style="margin-top:12px;padding:10px 12px;background:#1e3a5f;border-radius:8px;font-size:11px;color:#93c5fd">
+        <strong>⚡ Demostración ACID:</strong> Esta transferencia usa BEGIN TRANSACTION en SQL Server. Si falla cualquier paso, se ejecuta ROLLBACK automático (Atomicidad). El constraint saldo ≥ 0 garantiza Consistencia. El COMMIT garantiza Durabilidad.
+      </div>
+    </div>
+    <div class="sec"><div class="sec-h"><h2>Historial de transacciones</h2><span style="font-size:12px;color:#64748b">${txs.length} transacciones registradas</span></div>
+    <table><thead><tr><th>ID</th><th>Cuenta origen</th><th>Cuenta destino</th><th>Monto</th><th>Descripción</th><th>Fecha</th><th>Estado</th></tr></thead>
+    <tbody>${txs.map(t=>`<tr><td>#${t.id}</td><td>${t.origen_titular}<br><small style="color:#64748b;font-family:monospace">${t.origen_cuenta}</small></td><td>${t.destino_titular}<br><small style="color:#64748b;font-family:monospace">${t.destino_cuenta}</small></td><td style="font-weight:600;color:#0369a1">$${fmt(t.monto)}</td><td>${t.descripcion}</td><td>${fdate(t.fecha)}</td><td><span class="tag t-${t.estado}">${t.estado}</span></td></tr>`).join('')||'<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:20px">Sin transacciones aún</td></tr>'}</tbody></table></div>`;
+}
+
+async function hacerTransferenciaAdmin(){
+  const o=parseInt(document.getElementById('adm-origen').value);
+  const d=parseInt(document.getElementById('adm-destino').value);
+  const m=parseFloat(document.getElementById('adm-monto').value);
+  const desc=document.getElementById('adm-desc').value;
+  if(o===d) return toast('Cuenta origen y destino deben ser distintas',false);
+  if(!m||m<=0) return toast('Ingresa un monto válido',false);
+  const r=await fetch(`${API}/transferencia`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cuenta_origen_id:o,cuenta_destino_id:d,monto:m,descripcion:desc})});
+  const data=await r.json();
+  if(data.ok){ toast(`✅ TX #${data.transaccion_id} — ${data.mensaje}`); renderTransferencias(); }
+  else toast(`❌ ROLLBACK — ${data.error}`,false);
+}
+
+async function renderSolicitudes(){
+  const sols=await fetch(`${API}/solicitudes`).then(r=>r.json());
+  const pend=sols.filter(s=>s.estado==='pendiente').length;
+  document.getElementById('content').innerHTML=`
+    <div class="grid g4" style="margin-bottom:20px">
+      <div class="card"><div class="lbl">⏳ Pendientes</div><div class="val" style="color:#f59e0b">${pend}</div></div>
+      <div class="card"><div class="lbl">✅ Aprobadas</div><div class="val" style="color:#22c55e">${sols.filter(s=>s.estado==='aprobada').length}</div></div>
+      <div class="card"><div class="lbl">✗ Rechazadas</div><div class="val" style="color:#ef4444">${sols.filter(s=>s.estado==='rechazada').length}</div></div>
+      <div class="card"><div class="lbl">📋 Total</div><div class="val">${sols.length}</div></div>
+    </div>
+    <div class="sec"><div class="sec-h"><h2>Solicitudes de clientes</h2></div>
+    <table><thead><tr><th>ID</th><th>Cliente</th><th>Producto</th><th>Categoría</th><th>Fecha</th><th>Estado</th><th>Observación</th><th>Acción</th></tr></thead>
+    <tbody>${sols.map(s=>`<tr>
+      <td>#${s.id}</td><td>${s.cliente}</td><td>${s.producto}</td>
+      <td><span class="tag t-${s.categoria}">${s.categoria}</span></td>
+      <td>${fdate(s.fecha)}</td>
+      <td><span class="tag t-${s.estado}">${s.estado}</span></td>
+      <td style="font-size:12px;color:#64748b">${s.observacion||'—'}</td>
+      <td>${s.estado==='pendiente'?`<button class="btn-a" onclick="aprobarSol(${s.id})">✓ Aprobar</button><button class="btn-r" onclick="abrirRechazo(${s.id})">✗ Rechazar</button>`:'<span style="color:#94a3b8">—</span>'}</td>
+    </tr>`).join('')||'<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:20px">Sin solicitudes</td></tr>'}</tbody></table></div>`;
+}
+
+async function aprobarSol(id){
+  const r=await fetch(`${API}/solicitudes/${id}/aprobar`,{method:'PUT'});
+  const d=await r.json();
+  if(d.ok){ toast(`✅ ${d.mensaje}`); renderSolicitudes(); }
+  else toast(`❌ ${d.error}`,false);
+}
+
+function abrirRechazo(id){ rechazoId=id; document.getElementById('modal-rechazo').classList.remove('hidden'); }
+function closeModal(id){ document.getElementById(id).classList.add('hidden'); }
+
+async function confirmarRechazo(){
+  const motivo=document.getElementById('rechazo-motivo').value||'No cumple requisitos';
+  const r=await fetch(`${API}/solicitudes/${rechazoId}/rechazar`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({motivo})});
+  const d=await r.json();
+  closeModal('modal-rechazo');
+  if(d.ok){ toast('Solicitud rechazada'); renderSolicitudes(); }
+}
+
+async function renderUsuarios(){
+  const users=await fetch(`${API}/usuarios`).then(r=>r.json());
+  document.getElementById('content').innerHTML=`
+    <div class="sec"><div class="sec-h"><h2>Control de acceso — Usuarios registrados</h2></div>
+    <table><thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Rol</th></tr></thead>
+    <tbody>${users.map(u=>`<tr><td>#${u.id}</td><td>${u.nombre}</td><td>${u.email}</td><td><span class="tag t-${u.rol}">${u.rol}</span></td></tr>`).join('')}</tbody></table></div>`;
+}
+
+async function renderInventario(){
+  prods=await fetch(`${API}/productos`).then(r=>r.json());
+  const cats=[...new Set(prods.map(p=>p.categoria))];
+  document.getElementById('content').innerHTML=`
+    <div class="grid g4">${cats.map(c=>`<div class="card"><div class="lbl">${icons[c]||'📦'} ${c}</div><div class="val">${prods.filter(p=>p.categoria===c).length}</div><div class="sub">productos</div></div>`).join('')}</div>
+    <div class="sec"><div class="sec-h"><h2>Catálogo de productos y servicios financieros</h2></div>
+    <table><thead><tr><th>ID</th><th>Nombre</th><th>Descripción</th><th>Precio</th><th>Stock</th><th>Categoría</th></tr></thead>
+    <tbody>${prods.map(p=>`<tr><td>#${p.id}</td><td><strong>${p.nombre}</strong></td><td>${p.descripcion||'—'}</td><td>${parseFloat(p.precio)>0?'$'+fmt(p.precio):'Gratuito'}</td><td>${p.stock}</td><td><span class="tag t-${p.categoria}">${p.categoria}</span></td></tr>`).join('')}</tbody></table></div>`;
+}
+
+// ── CLIENT ──
+function cTab(el,tab){
+  document.querySelectorAll('.ct-btn').forEach(b=>{b.style.background='#f1f5f9';b.style.color='#374151';});
+  el.style.background='#0ea5e9'; el.style.color='#fff';
+  ['c-mis-cuentas','c-transferir','c-solicitar','c-movimientos','c-mis-solicitudes'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  document.getElementById(tab).classList.remove('hidden');
+  loadClientTab(tab);
+}
+
+async function loadClientTab(tab){
+  if(tab==='c-mis-cuentas'){
+    clientCuentas=await fetch(`${API}/cuentas/usuario/${cu.id}`).then(r=>r.json());
+    document.getElementById('c-cuentas-grid').innerHTML=clientCuentas.length?clientCuentas.map((c,i)=>`
+      <div class="${i%2===0?'acc-card':'acc-card acc-card-green'}">
+        <div class="ac-tipo">${c.tipo} — ${c.estado}</div>
+        <div class="ac-num">${c.numero_cuenta}</div>
+        <div class="ac-lbl">Saldo disponible</div>
+        <div class="ac-saldo">$${fmt(c.saldo)}</div>
+      </div>`).join(''):'<div style="padding:20px;color:#64748b">No tienes cuentas activas. Solicita una en "Solicitar servicio".</div>';
+  }
+  if(tab==='c-transferir'){
+    clientCuentas=await fetch(`${API}/cuentas/usuario/${cu.id}`).then(r=>r.json());
+    const allC=await fetch(`${API}/cuentas`).then(r=>r.json());
+    document.getElementById('tx-origen').innerHTML=clientCuentas.map(c=>`<option value="${c.id}">#${c.id} | ${c.tipo} | Saldo: $${fmt(c.saldo)}</option>`).join('');
+    document.getElementById('c-all-cuentas').innerHTML=allC.map(c=>`<tr><td>#${c.id}</td><td style="font-family:monospace;font-size:11px">${c.numero_cuenta}</td><td>${c.titular}</td><td><span class="tag t-${c.tipo}">${c.tipo}</span></td><td style="font-weight:600;color:#0369a1">$${fmt(c.saldo)}</td></tr>`).join('');
+  }
+  if(tab==='c-solicitar'){
+    prods=await fetch(`${API}/productos`).then(r=>r.json());
+    document.getElementById('c-prod-grid').innerHTML=prods.map(p=>`
+      <div class="pc">
+        <div class="ico">${icons[p.categoria]||'🏦'}</div>
+        <div class="pn">${p.nombre}</div>
+        <div class="pd">${p.descripcion||''}</div>
+        <div class="pp">${parseFloat(p.precio)>0?'$'+fmt(p.precio):'Gratuito'}</div>
+        <button onclick="solicitarProd(${p.id})">Solicitar</button>
+      </div>`).join('');
+  }
+  if(tab==='c-movimientos'){
+    const txs=await fetch(`${API}/transacciones/usuario/${cu.id}`).then(r=>r.json());
+    document.getElementById('c-tx-body').innerHTML=txs.length?txs.map(t=>`<tr><td>#${t.id}</td><td>${t.origen_cuenta}<br><small>${t.origen_titular}</small></td><td>${t.destino_cuenta}<br><small>${t.destino_titular}</small></td><td style="font-weight:600;color:${t.origen_titular===cu.nombre?'#ef4444':'#22c55e'}">${t.origen_titular===cu.nombre?'-':'+'}$${fmt(t.monto)}</td><td>${t.descripcion}</td><td>${fdate(t.fecha)}</td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:20px">Sin movimientos</td></tr>';
+  }
+  if(tab==='c-mis-solicitudes'){
+    const sols=await fetch(`${API}/solicitudes/usuario/${cu.id}`).then(r=>r.json());
+    document.getElementById('c-sol-body').innerHTML=sols.length?sols.map(s=>`<tr><td>#${s.id}</td><td>${s.producto}</td><td><span class="tag t-${s.categoria}">${s.categoria}</span></td><td>${fdate(s.fecha)}</td><td><span class="tag t-${s.estado}">${s.estado}</span></td><td style="font-size:12px;color:#64748b">${s.observacion||'—'}</td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:20px">Sin solicitudes</td></tr>';
+  }
+}
+
+async function solicitarProd(pid){
+  const r=await fetch(`${API}/solicitudes`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuario_id:cu.id,producto_id:pid})});
+  const d=await r.json();
+  if(d.ok) toast(`✅ Solicitud #${d.solicitud_id} enviada. El administrador la revisará pronto.`);
+  else toast(`❌ ${d.error}`,false);
+}
+
+async function hacerTransferencia(){
+  const o=parseInt(document.getElementById('tx-origen').value);
+  const d=parseInt(document.getElementById('tx-destino').value);
+  const m=parseFloat(document.getElementById('tx-monto').value);
+  const desc=document.getElementById('tx-desc').value||'Transferencia';
+  if(!d||isNaN(d)) return toast('Ingresa el ID de la cuenta destino',false);
+  if(!m||m<=0) return toast('Ingresa un monto válido',false);
+  if(o===d) return toast('Cuenta origen y destino deben ser distintas',false);
+  const r=await fetch(`${API}/transferencia`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cuenta_origen_id:o,cuenta_destino_id:d,monto:m,descripcion:desc})});
+  const data=await r.json();
+  if(data.ok){ toast(`✅ TX #${data.transaccion_id} — ${data.mensaje}`); loadClientTab('c-transferir'); }
+  else toast(`❌ ROLLBACK ejecutado — ${data.error}`,false);
+}
+</script>
+</body>
+</html>
